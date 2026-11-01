@@ -1,0 +1,12 @@
+.firebase-data/
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+node_modules/
+
+# Secrets: never commit
+*serviceAccountKey*.json
+.env
+*.log
+.next/

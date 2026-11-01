@@ -1,0 +1,101 @@
+rules_version = '2';
+
+// SeeWater Firestore security rules.
+//
+// Trust model
+// • All writes go through the SeeWater API, which uses the Firebase Admin SDK
+//   (bypasses these rules) and validates every request on the server.
+// • Browsers and apps get READ access only, limited by role:
+//     - admin     → custom claim role == 'admin' (set only by the trusted
+//                   create-admin script via the Admin SDK). Read-only access to
+//                   the operational collections used for live dashboard updates.
+//     - homeowner → custom claim role == 'homeowner'. Only their own profile,
+//                   households, devices, readings, alerts and notifications.
+// • Nobody can write from a client, so roles, ownership and device links can't
+//   be changed by editing frontend data.
+// • Activation codes, admin-only records and audit logs are never readable by
+//   homeowners; activation codes are not readable by any client at all.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && request.auth.token.role == 'admin'; }
+    function isHomeowner() {
+      return signedIn() && request.auth.token.role == 'homeowner' && request.auth.token.email_verified == true;
+    }
+    function ownsHouse(houseId) {
+      return isHomeowner() && houseId is string
+        && exists(/databases/$(database)/documents/houses/$(houseId))
+        && get(/databases/$(database)/documents/houses/$(houseId)).data.userId == request.auth.uid;
+    }
+
+    // Default: deny everything not matched below.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ── Accounts ────────────────────────────────────────────────────────────
+    match /admins/{uid} {
+      allow read: if isAdmin() && request.auth.uid == uid;
+    }
+    match /users/{uid} {
+      allow read: if isAdmin() || (isHomeowner() && request.auth.uid == uid);
+    }
+
+    // ── Households & devices ────────────────────────────────────────────────
+    match /houses/{houseId} {
+      allow read: if isAdmin() || (isHomeowner() && resource.data.userId == request.auth.uid);
+    }
+    match /devices/{deviceId} {
+      allow read: if isAdmin() || ownsHouse(resource.data.houseId);
+    }
+    match /sensors/{sensorId} {
+      allow read: if isAdmin() || ownsHouse(resource.data.houseId);
+    }
+    match /valves/{valveId} {
+      allow read: if isAdmin() || ownsHouse(resource.data.houseId);
+    }
+    match /valveCommands/{commandId} {
+      allow read: if isAdmin() || ownsHouse(resource.data.houseId);
+    }
+    // Never readable by clients: codes are validated only by the API.
+    match /activationCodes/{code} {
+      allow read, write: if false;
+    }
+
+    // ── Telemetry & events ──────────────────────────────────────────────────
+    match /sensorReadings/{readingId} {
+      allow read: if isAdmin() || ownsHouse(resource.data.houseId);
+    }
+    match /waterUsage/{usageId} {
+      allow read: if isAdmin() || ownsHouse(resource.data.houseId);
+    }
+    match /alerts/{alertId} {
+      allow read: if isAdmin() || ownsHouse(resource.data.houseId);
+    }
+    match /notifications/{notificationId} {
+      allow read: if isHomeowner() && resource.data.userId == request.auth.uid;
+    }
+
+    // ── Admin-only operational data ─────────────────────────────────────────
+    match /systemLogs/{id} { allow read: if isAdmin(); }
+    match /deviceLogs/{id} { allow read: if isAdmin(); }
+    match /deviceStatusHistory/{id} { allow read: if isAdmin(); }
+    match /calibrations/{id} { allow read: if isAdmin(); }
+    match /thresholdProfiles/{id} { allow read: if isAdmin(); }
+    match /vibrationBaselines/{id} { allow read: if isAdmin(); }
+    match /vibrationBaselineHistory/{id} { allow read: if isAdmin(); }
+    match /userManagement/{id} { allow read: if isAdmin(); }
+    match /settings/{id} { allow read: if isAdmin(); }
+    match /firmwareUpdates/{id} { allow read: if isAdmin(); }
+
+    // ── Communication ───────────────────────────────────────────────────────
+    match /announcements/{id} {
+      allow read: if isAdmin() || (isHomeowner() && resource.data.status == 'published');
+    }
+    match /feedback/{id} {
+      allow read: if isAdmin() || (isHomeowner() && resource.data.userId == request.auth.uid);
+    }
+  }
+}

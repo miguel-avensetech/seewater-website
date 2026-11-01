@@ -1,0 +1,19 @@
+{
+  "name": "seewater-website",
+  "private": true,
+  "description": "Firebase tooling for the SeeWater admin website and API (emulators, rules, rules tests)",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:emulator": "node scripts/dev.mjs --emulator",
+    "emulators": "firebase emulators:start --project demo-seewater --import=.firebase-data --export-on-exit=.firebase-data",
+    "emulators:fresh": "firebase emulators:start --project demo-seewater",
+    "test:rules": "firebase emulators:exec --project demo-seewater --only firestore,database,storage \"node --test --test-concurrency=1 firebase/tests/*.test.js\"",
+    "deploy:rules": "firebase deploy --project seewater --only firestore:rules,firestore:indexes,database",
+    "deploy:storage-rules": "firebase deploy --project seewater --only storage"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0",
+    "firebase-tools": "^15.34.0"
+  }
+}

@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+
+/* Dark mode follows <html data-theme="dark">, set before paint by the script in app/layout.js. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ── SeeWater design tokens ─────────────────────────────────────────────── */
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-navy-950: #06142b;
+  --color-navy-900: #0a1f3d;
+  --color-navy-800: #12305a;
+  --color-navy-700: #1b4275;
+  --color-navy-600: #2a5791;
+
+  --color-ocean-800: #0a4485;
+  --color-ocean-700: #0b4f9c;
+  --color-ocean-600: #0e63c2;
+  --color-ocean-500: #1f7ae0;
+  --color-ocean-200: #b9d6f6;
+  --color-ocean-100: #dcebfb;
+  --color-ocean-50: #eef5fd;
+
+  --color-aqua-600: #0894ab;
+  --color-aqua-500: #0eb5cf;
+  --color-aqua-400: #2ccbe0;
+  --color-aqua-100: #d5f5fa;
+  --color-aqua-50: #ecfbfd;
+
+  --color-canvas: #f4f7fb;
+  --color-surface: #ffffff;
+  --color-line: #e3e9f2;
+  --color-line-strong: #cfd9e6;
+  --color-ink: #0c1b33;
+  --color-ink-soft: #33435c;
+  --color-muted: #5b6b82;
+  --color-faint: #8494aa;
+
+  --color-ok-700: #0d7347;
+  --color-ok-600: #12925b;
+  --color-ok-50: #e7f6ee;
+  --color-warn-700: #9a5b00;
+  --color-warn-600: #c97a06;
+  --color-warn-50: #fdf3e1;
+  --color-crit-700: #b02a2a;
+  --color-crit-600: #d23b3b;
+  --color-crit-50: #fcebeb;
+
+  --shadow-card: 0 1px 2px rgb(10 31 61 / 0.04), 0 1px 3px rgb(10 31 61 / 0.06);
+  --shadow-pop: 0 10px 30px -10px rgb(10 31 61 / 0.25), 0 4px 10px -6px rgb(10 31 61 / 0.12);
+
+  --animate-fade-in: fade-in 160ms ease-out;
+  --animate-pop-in: pop-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  --animate-slide-in: slide-in 200ms ease-out;
+}
+
+/* ── Dark palette ───────────────────────────────────────────────────────────
+ * Same token names, re-valued: surfaces go dark, the "50/100" tints become
+ * deep tints, and the "700/800" shades used for text become light enough to
+ * read on dark surfaces. The navy sidebar keeps its colors in both themes. */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-canvas: #0b1322;
+  --color-surface: #121c2e;
+  --color-line: #23324a;
+  --color-line-strong: #31445f;
+  --color-ink: #e7edf6;
+  --color-ink-soft: #c2cddc;
+  --color-muted: #94a3b8;
+  --color-faint: #6e7f97;
+
+  --color-ocean-800: #a9cdf9;
+  --color-ocean-700: #82b6f4;
+  --color-ocean-600: #2f7fe0;
+  --color-ocean-500: #4a93ea;
+  --color-ocean-200: #1e4677;
+  --color-ocean-100: #16345c;
+  --color-ocean-50: #10233f;
+
+  --color-aqua-600: #4fd6e8;
+  --color-aqua-100: #0f3a43;
+  --color-aqua-50: #0c2a31;
+
+  --color-ok-700: #5bd69a;
+  --color-ok-600: #22a86a;
+  --color-ok-50: #0f2b20;
+  --color-warn-700: #f3b65a;
+  --color-warn-600: #d98d16;
+  --color-warn-50: #2e2311;
+  --color-crit-700: #f39494;
+  --color-crit-600: #e04b4b;
+  --color-crit-50: #34181b;
+
+  --color-slate-100: #1c2739;
+  --color-slate-200: #263349;
+  --color-slate-300: #3a4a63;
+  --color-slate-400: #5b6b82;
+  --color-slate-600: #b4c0d0;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px rgb(0 0 0 / 0.35);
+  --shadow-pop: 0 10px 30px -10px rgb(0 0 0 / 0.6), 0 4px 10px -6px rgb(0 0 0 / 0.5);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slide-in {
+  from { transform: translateX(-100%); }
+  to { transform: none; }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+  }
+  ::selection {
+    background: var(--color-aqua-100);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ocean-500);
+    outline-offset: 2px;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle water-ripple texture used on the login hero and sidebar footer. */
+@utility ripple-bg {
+  background-image:
+    radial-gradient(circle at 20% 110%, rgb(44 203 224 / 0.18), transparent 45%),
+    radial-gradient(circle at 90% -10%, rgb(31 122 224 / 0.25), transparent 40%),
+    repeating-radial-gradient(circle at 20% 110%, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 22px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

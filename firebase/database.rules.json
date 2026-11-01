@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "live": {
+      ".write": false,
+      "devices": {
+        ".read": "auth != null && auth.token.role === 'admin'",
+        "$deviceId": {
+          ".read": "auth != null && auth.token.role === 'homeowner' && auth.token.email_verified === true && data.child('ownerId').val() === auth.uid"
+        }
+      },
+      "alerts": {
+        ".read": "auth != null && auth.token.role === 'admin'",
+        "$alertId": {
+          ".read": "auth != null && auth.token.role === 'homeowner' && auth.token.email_verified === true && data.child('ownerId').val() === auth.uid"
+        }
+      }
+    }
+  }
+}

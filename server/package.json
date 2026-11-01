@@ -1,0 +1,37 @@
+{
+  "name": "seewater-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SeeWater API \u2014 admin dashboard backend and IoT device ingestion",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/index.js",
+    "start": "node --env-file-if-exists=.env src/index.js",
+    "seed": "node --env-file-if-exists=.env scripts/seed.js",
+    "create-admin": "node --env-file-if-exists=.env scripts/createAdmin.js",
+    "test": "../node_modules/.bin/firebase emulators:exec --config ../firebase.json --project demo-seewater --only auth,firestore,database,storage \"DB_DRIVER=firestore FIREBASE_PROJECT_ID=demo-seewater NODE_ENV=test node --test --test-concurrency=1 test/*.test.js\"",
+    "simulate": "node --env-file-if-exists=.env scripts/simulate.js",
+    "emulators": "../node_modules/.bin/firebase emulators:start --config ../firebase.json --project demo-seewater --import=../.firebase-data --export-on-exit=../.firebase-data",
+    "sync-live": "node --env-file-if-exists=.env scripts/syncLive.js",
+    "dev:emulator": "node --watch --env-file=.env.emulator src/index.js",
+    "check-firebase": "node --env-file-if-exists=.env scripts/checkFirebase.js"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
+    "firebase-admin": "^13.4.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.13",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4"
+  }
+}

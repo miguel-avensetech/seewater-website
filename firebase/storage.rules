@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// SeeWater Cloud Storage rules. Only uploaded files live here (profile pictures,
+// announcement attachments); structured records stay in Firestore.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && request.auth.token.role == 'admin'; }
+    function isHomeowner() { return signedIn() && request.auth.token.role == 'homeowner'; }
+    function isImage() { return request.resource.contentType.matches('image/(png|jpeg|webp)'); }
+    function isAttachment() {
+      return request.resource.contentType.matches('image/(png|jpeg|webp)')
+        || request.resource.contentType == 'application/pdf';
+    }
+
+    // Deny by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Admin profile pictures: an admin may only write their own (≤ 2 MB image).
+    match /admins/{uid}/{fileName} {
+      allow read: if isAdmin();
+      allow write: if isAdmin() && request.auth.uid == uid
+        && request.resource.size < 2 * 1024 * 1024 && isImage();
+      allow delete: if isAdmin() && request.auth.uid == uid;
+    }
+
+    // Homeowner profile pictures (used once the mobile app moves to Firebase Auth).
+    match /users/{uid}/{fileName} {
+      allow read: if isAdmin() || (isHomeowner() && request.auth.uid == uid);
+      allow write: if isHomeowner() && request.auth.uid == uid
+        && request.resource.size < 2 * 1024 * 1024 && isImage();
+      allow delete: if isHomeowner() && request.auth.uid == uid;
+    }
+
+    // Announcement attachments: admins upload (PDF or image ≤ 10 MB); any signed-in
+    // user may read. The mobile app opens them through the tokenised download URL
+    // stored on the announcement.
+    match /announcements/{folder}/{fileName} {
+      allow read: if signedIn();
+      allow write: if isAdmin() && request.resource.size < 10 * 1024 * 1024 && isAttachment();
+      allow delete: if isAdmin();
+    }
+  }
+}
