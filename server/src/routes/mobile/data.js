@@ -298,7 +298,7 @@ router.get(
   '/rates',
   asyncHandler(async (req, res) => {
     const customerClass = 'residential';
-    const [rates, announcements] = await Promise.all([db.list(C.waterRates), db.list(C.announcements, { where: [['status', '==', 'published']] })]);
+    const rates = await db.list(C.waterRates);
     const published = withRateStatus(rates).filter((r) => r.publishedAt && r.customerClass === customerClass);
     const active = published.find((r) => r.status === 'active') ?? null;
 
@@ -326,11 +326,6 @@ router.get(
       active: active && publicRate(active),
       upcoming: published.filter((r) => r.status === 'scheduled').sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate)).map(publicRate),
       previous: published.filter((r) => r.status === 'superseded').sort((a, b) => b.effectiveDate.localeCompare(a.effectiveDate)).slice(0, 3).map(publicRate),
-      notices: announcements
-        .filter((a) => a.category === 'billing_notice')
-        .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''))
-        .slice(0, 5)
-        .map(({ id, title, message, publishedAt }) => ({ id, title, message, publishedAt })),
       estimate,
     });
   }),

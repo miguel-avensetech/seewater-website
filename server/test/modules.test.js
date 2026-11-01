@@ -127,7 +127,7 @@ test('water interruptions: validation, advisory, status lifecycle, dashboard cou
   assert.equal(cancelled.body.status, 'cancelled');
 });
 
-test('water rates: tier validation, publish with billing notice, estimate', async () => {
+test('water rates: tier validation, publish, estimate', async () => {
   const bad = await admin.post('/api/rates').send({ name: 'Bad', customerClass: 'residential', effectiveDate: '2026-01-01', minimumVolumeM3: 10, minimumCharge: 250, tiers: [{ fromM3: 12, toM3: null, ratePerM3: 30 }] });
   assert.equal(bad.status, 400);
   assert.ok(bad.body.error.fields['tiers.0.fromM3']);
@@ -137,11 +137,11 @@ test('water rates: tier validation, publish with billing notice, estimate', asyn
   const noRate = await admin.get(`/api/rates/estimate?houseId=${house.id}`);
   assert.equal(noRate.status, 400);
 
-  const pub = await admin.post(`/api/rates/${draft.body.id}/publish`).send({ billingNotice: true });
+  const pub = await admin.post(`/api/rates/${draft.body.id}/publish`).send({});
   assert.equal(pub.body.status, 'active');
   assert.equal((await admin.patch(`/api/rates/${draft.body.id}`).send({})).status, 409);
-  const notices = await admin.get('/api/announcements?category=billing_notice');
-  assert.equal(notices.body.total, 1);
+  const billing = await admin.post('/api/announcements').send({ title: 'Bill', message: 'Pay now', category: 'billing_notice', audience: 'all_users' });
+  assert.equal(billing.status, 400); // admins can't announce billing
 
   const est = await admin.get(`/api/rates/estimate?houseId=${house.id}`);
   assert.equal(est.status, 200);

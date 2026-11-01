@@ -12,7 +12,7 @@ import { loadDailyUsage } from '../services/usage.js';
 //
 // Tariffs are published in ₱ per cubic metre (m³), as on MCWD bills; SeeWater
 // measures in liters, so conversions are explicit (1 m³ = 1,000 L).
-// This module manages rate information and billing-update notices only. It does
+// This module manages rate information only (admins don't post billing notices). It does
 // NOT produce official bills or process payments; estimates are labelled as such.
 
 const router = Router();
@@ -99,7 +99,7 @@ router.post(
   requireRole('admin'),
   asyncHandler(async (req, res) => {
     const data = parse(schema, req.body);
-    const rate = await db.create(C.waterRates, { ...data, publishedAt: null, announcementId: null, createdBy: req.admin.id, createdAt: nowIso(), updatedAt: nowIso() });
+    const rate = await db.create(C.waterRates, { ...data, publishedAt: null, createdBy: req.admin.id, createdAt: nowIso(), updatedAt: nowIso() });
     await logSystem({ category: 'system_update', action: 'rate_draft_created', description: `Rate schedule drafted: ${rate.name}`, status: 'info', actor: req.admin });
     res.status(201).json(withRateStatus([rate])[0]);
   }),
@@ -133,38 +133,13 @@ router.delete(
   }),
 );
 
-const publishSchema = z.object({ billingNotice: z.boolean().default(true), message: z.string().trim().max(3000).optional().default('') });
-
-// Publishing makes the schedule official; optionally posts a billing notice.
+// Publishing makes the schedule official. Homeowners see it under Water rates.
 router.post(
   '/:id/publish',
   requireRole('admin'),
   asyncHandler(async (req, res) => {
     const rate = await getDraft(req.params.id);
-    const { billingNotice, message } = parse(publishSchema, req.body);
-    let announcementId = null;
-    if (billingNotice) {
-      const tierText = rate.tiers.map((t) => `${t.fromM3}–${t.toM3 ?? 'above'} m³: ₱${t.ratePerM3.toFixed(2)}/m³`).join('\n');
-      const notice = await db.create(C.announcements, {
-        title: `New ${rate.customerClass} water rates effective ${rate.effectiveDate}`,
-        message: message || `${rate.name} takes effect on ${rate.effectiveDate}.\n\nMinimum charge: ₱${rate.minimumCharge.toFixed(2)} for the first ${rate.minimumVolumeM3} m³.\n${tierText}`,
-        category: 'billing_notice',
-        audience: 'all_users',
-        audienceArea: '',
-        priority: 'normal',
-        status: 'published',
-        publishAt: null,
-        publishedAt: nowIso(),
-        attachmentUrl: '',
-        interruption: null,
-        rateId: rate.id,
-        adminId: req.admin.id,
-        createdAt: nowIso(),
-        updatedAt: nowIso(),
-      });
-      announcementId = notice.id;
-    }
-    const updated = await db.update(C.waterRates, rate.id, { publishedAt: nowIso(), publishedBy: req.admin.id, announcementId, updatedAt: nowIso() });
+    const updated = await db.update(C.waterRates, rate.id, { publishedAt: nowIso(), publishedBy: req.admin.id, updatedAt: nowIso() });
     await logSystem({ category: 'system_update', action: 'rate_published', description: `Rate schedule published: ${rate.name} (effective ${rate.effectiveDate})`, status: 'success', actor: req.admin });
     res.json(withRateStatus(await db.list(C.waterRates)).find((r) => r.id === updated.id));
   }),

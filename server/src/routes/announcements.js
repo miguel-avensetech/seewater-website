@@ -17,7 +17,7 @@ async function deleteAttachment(path) {
 const router = Router();
 
 // Categories from the manuscript (Fig. 32).
-export const CATEGORIES = ['service_advisory', 'billing_notice', 'conservation_reminder', 'customer_tip'];
+export const CATEGORIES = ['service_advisory', 'conservation_reminder', 'customer_tip'];
 
 // Publishes scheduled announcements whose time has come. Called lazily on reads
 // and by the background sweep in index.js.

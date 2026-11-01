@@ -251,7 +251,7 @@ function AnnouncementsPage() {
       <SectionTabs tabs={ANNOUNCEMENT_TABS} />
       <PageHeader
         title="Announcements"
-        description="Service advisories, billing notices, water conservation reminders and customer tips for homeowners."
+        description="Service advisories, water conservation reminders and customer tips for homeowners."
         actions={canEdit && <Button icon={Plus} onClick={() => setModal({ open: true, item: null })}>New announcement</Button>}
       />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

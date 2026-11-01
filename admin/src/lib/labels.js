@@ -183,7 +183,6 @@ export const ANNOUNCEMENT_STATUS = map([
 
 export const ANNOUNCEMENT_CATEGORY = map([
   ['service_advisory', 'Service advisory', 'info'],
-  ['billing_notice', 'Billing notice', 'warn'],
   ['conservation_reminder', 'Water conservation', 'aqua'],
   ['customer_tip', 'Customer tip', 'neutral'],
 ]);

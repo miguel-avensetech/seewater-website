@@ -24,7 +24,7 @@ export const C = {
   vibrationBaselineHistory: 'vibrationBaselineHistory',
   announcements: 'announcements', // ANNOUNCEMENT
   waterInterruptions: 'waterInterruptions', // planned / emergency service interruptions
-  waterRates: 'waterRates', // tariff schedules (₱ per m³) — reference for billing updates
+  waterRates: 'waterRates', // tariff schedules (₱ per m³) shown to homeowners and used for estimates
   firmwareUpdates: 'firmwareUpdates', // OTA firmware jobs, one per device
   feedback: 'feedback', // user suggestions / complaints / reports
   settings: 'settings',

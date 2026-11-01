@@ -11,7 +11,7 @@ import { ANNOUNCEMENT_TABS, SectionTabs } from '@/components/layout/SectionTabs'
 import { PageHeader, StatCard } from '@/components/ui/Layout';
 import { StatusBadge } from '@/components/ui/Badge';
 import { DataTable, Pagination, TableToolbar, SearchInput } from '@/components/ui/DataTable';
-import { FilterSelect, Input, Select, Switch, Textarea } from '@/components/ui/Field';
+import { FilterSelect, Input, Select, Textarea } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
 import { ConfirmDialog, Modal } from '@/components/ui/Modal';
 import { EmptyState, InlineNotice } from '@/components/ui/States';
@@ -178,7 +178,6 @@ export default function RatesPage() {
   const { data, params } = list;
   const [modal, setModal] = useState({ open: false, rate: null });
   const [publishing, setPublishing] = useState(null);
-  const [notice, setNotice] = useState(true);
   const [deleting, setDeleting] = useState(null);
   const s = data?.summary;
 
@@ -187,7 +186,7 @@ export default function RatesPage() {
       <SectionTabs tabs={ANNOUNCEMENT_TABS} />
       <PageHeader
         title="Rate Updates"
-        description="Tariff schedules used for billing updates and usage estimates. SeeWater does not issue official bills or process payments."
+        description="Tariff schedules shown to homeowners and used for usage estimates. SeeWater does not issue official bills or process payments."
         actions={canEdit && <Button icon={Plus} onClick={() => setModal({ open: true, rate: null })}>New rate schedule</Button>}
       />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -213,7 +212,7 @@ export default function RatesPage() {
             sort={params.sort ?? 'effectiveDate'}
             order={params.order}
             onSort={list.toggleSort}
-            empty={<EmptyState icon={Receipt} title="No rate schedules yet" message="Add MCWD’s current tariff so billing notices and usage estimates use the right rates." action={canEdit && <Button size="sm" icon={Plus} onClick={() => setModal({ open: true, rate: null })}>New rate schedule</Button>} />}
+            empty={<EmptyState icon={Receipt} title="No rate schedules yet" message="Add MCWD’s current tariff so homeowners and usage estimates use the right rates." action={canEdit && <Button size="sm" icon={Plus} onClick={() => setModal({ open: true, rate: null })}>New rate schedule</Button>} />}
             columns={[
               { key: 'name', header: 'Schedule', sortable: true, render: (r) => <div><p className="font-semibold text-ink">{r.name}</p><p className="text-xs text-muted">{CUSTOMER_CLASS[r.customerClass]?.label} · min. {peso(r.minimumCharge)} / {r.minimumVolumeM3} m³</p></div> },
               { key: 'tiers', header: 'Tiers (₱/m³)', className: 'text-[13px]', render: (r) => r.tiers.map((t) => `${t.fromM3}–${t.toM3 ?? '∞'}: ${fmtNumber(t.ratePerM3, 2)}`).join(' · ') },
@@ -247,13 +246,11 @@ export default function RatesPage() {
         confirmLabel="Publish"
         message={`Published schedules can’t be edited. It becomes active on ${publishing ? fmtDate(`${publishing.effectiveDate}T00:00:00`) : ''}.`}
         onConfirm={async () => {
-          await api(`/rates/${publishing.id}/publish`, { method: 'POST', body: { billingNotice: notice } });
-          toast.success('Rate schedule published', notice ? 'Billing notice posted to homeowners' : undefined);
+          await api(`/rates/${publishing.id}/publish`, { method: 'POST' });
+          toast.success('Rate schedule published');
           list.reload({ silent: true });
         }}
-      >
-        <Switch checked={notice} onChange={setNotice} label="Post a billing notice" description="Publishes an announcement with the new rates for all homeowners." />
-      </ConfirmDialog>
+      />
       <ConfirmDialog
         open={Boolean(deleting)}
         onClose={() => setDeleting(null)}
