@@ -166,7 +166,7 @@ function LoginForm() {
 const features = [
   { icon: Activity, title: 'Live flow monitoring', text: 'Household flow rates and consumption from ESP32 sensor gateways.' },
   { icon: Waves, title: 'Vibration-based leak detection', text: 'Piezo sensors checked against calibrated environmental baselines.' },
-  { icon: BellRing, title: 'Alerts and remote shutoff', text: 'High-flow and leak alerts with device-confirmed valve control.' },
+  { icon: BellRing, title: 'Leak and high-flow alerts', text: 'Real-time alerts, with valve status confirmed by each device.' },
 ];
 ``
 export default function LoginPage() {

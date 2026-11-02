@@ -4,6 +4,7 @@ import request from 'supertest';
 import { db, C } from '../src/db/index.js';
 import { adminAuth } from '../src/lib/firebaseAdmin.js';
 import { adminAgent, createAdmin, firebaseSignIn, resetEmulators } from './helpers.js';
+import { requestValveCommand } from '../src/services/valves.js';
 
 let app;
 let agent;
@@ -180,18 +181,15 @@ test('vibration needs a baseline and concurrent flow to raise a leak alert', asy
   assert.equal(alerts.body.items[0].possibleLeakArea, 'Kitchen line');
 });
 
-test('valve shutoff stays pending until the device confirms', async () => {
-  const cmd = await agent.post(`/api/valves/${creds.valveId}/command`).send({ action: 'close', reason: 'Leak alert' });
-  assert.equal(cmd.status, 202);
-  assert.equal(cmd.body.commandStatus, 'pending');
-  assert.notEqual(cmd.body.status, 'closed');
+test('valve shutoff stays pending until the device confirms; admins cannot operate valves', async () => {
+  // Administrators can only view valves.
+  const byAdmin = await agent.post(`/api/valves/${creds.valveId}/command`).send({ action: 'close' });
+  assert.equal(byAdmin.status, 404);
 
-  const dup = await agent.post(`/api/valves/${creds.valveId}/command`).send({ action: 'close' });
-  assert.equal(dup.status, 409);
-
-  // Real devices cannot be "simulated" from the dashboard.
-  const fake = await agent.post(`/api/valves/${creds.valveId}/simulate-ack`);
-  assert.equal(fake.status, 409);
+  const cmd = await requestValveCommand({ valveId: creds.valveId, action: 'close', reason: 'Automatic shutoff: leak', actorType: 'automatic', emergency: true });
+  assert.equal(cmd.commandStatus, 'pending');
+  assert.notEqual(cmd.status, 'closed');
+  await assert.rejects(requestValveCommand({ valveId: creds.valveId, action: 'close', actorType: 'automatic' }), (err) => err.status === 409);
 
   const { body } = await dev('get', '/commands');
   assert.equal(body.commands[0].state, 'closed');

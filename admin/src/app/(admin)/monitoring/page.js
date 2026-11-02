@@ -14,14 +14,14 @@ import { SearchInput } from '@/components/ui/DataTable';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { TimeSeriesChart, CHART } from '@/components/charts/Charts';
-import { ValveControl } from '@/components/domain/ValveControl';
+import { ValveStatus } from '@/components/domain/ValveStatus';
 import { ThresholdMeter } from '@/components/domain/FlowMeter';
 import { fmtFlow, fmtLiters, fmtRelative, fmtTime } from '@/lib/format';
 import { ALERT_TYPE, CONNECTION, FLOW_STATUS, lookup } from '@/lib/labels';
 
 const REFRESH_MS = 15000;
 
-function HouseCard({ house, onOpen, onChanged }) {
+function HouseCard({ house, onOpen }) {
   const offline = house.device && house.device.connectionStatus !== 'online';
   return (
     <Card className={clsx('flex flex-col transition-shadow hover:shadow-pop', house.status === 'critical' && 'ring-2 ring-crit-600/30', house.status === 'high' && 'ring-2 ring-warn-600/25')}>
@@ -67,7 +67,7 @@ function HouseCard({ house, onOpen, onChanged }) {
 
       {house.device && (
         <div className="border-t border-line px-4 py-3">
-          <ValveControl valve={house.valve} device={house.device} onChanged={onChanged} compact />
+          <ValveStatus valve={house.valve} compact />
         </div>
       )}
     </Card>
@@ -80,7 +80,7 @@ const WINDOWS = [
   { value: 1440, label: '24 hours' },
 ];
 
-function HouseDetail({ house, onClose, onChanged }) {
+function HouseDetail({ house, onClose }) {
   const [minutes, setMinutes] = useState(60);
   const { data, error, loading, reload } = useApi(house ? `/monitoring/houses/${house.houseId}/readings` : null, { query: { minutes }, refreshMs: REFRESH_MS });
   const flow = data?.readings.filter((r) => r.readingType === 'flow') ?? [];
@@ -115,7 +115,7 @@ function HouseDetail({ house, onClose, onChanged }) {
             </>
           )}
           <div className="rounded-lg border border-line p-4">
-            <ValveControl valve={house.valve} device={house.device} onChanged={onChanged} />
+            <ValveStatus valve={house.valve} />
           </div>
           {house.device && (
             <Link href={`/devices/${house.device.id}`} className="inline-block text-[13px] font-semibold text-ocean-700 hover:underline">
@@ -201,7 +201,7 @@ export default function MonitoringPage() {
       {houses.length ? (
         <div className="mt-4 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {houses.map((h) => (
-            <HouseCard key={h.houseId} house={h} onOpen={() => setOpenId(h.houseId)} onChanged={reload} />
+            <HouseCard key={h.houseId} house={h} onOpen={() => setOpenId(h.houseId)} />
           ))}
         </div>
       ) : (
@@ -210,7 +210,7 @@ export default function MonitoringPage() {
         </Card>
       )}
 
-      <HouseDetail house={open} onClose={() => setOpenId(null)} onChanged={reload} />
+      <HouseDetail house={open} onClose={() => setOpenId(null)} />
     </>
   );
 }

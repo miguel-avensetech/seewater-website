@@ -58,7 +58,7 @@ async function tick(device) {
   if (device === target && args.scenario === 'high-flow') flowRate = round1(19 + Math.random() * 8);
 
   device.firmwareVersion ??= '1.2.0';
-  await call(device, 'POST', '/heartbeat', { firmwareVersion: device.firmwareVersion, signalStrength: -50 - Math.round(Math.random() * 30) });
+  await call(device, 'POST', '/heartbeat', { firmwareVersion: device.firmwareVersion, signalStrength: -50 - Math.round(Math.random() * 30), configVersion: device.configVersion });
   const result = await call(device, 'POST', '/readings', {
     readings: [
       { sensorId: device.flowSensorId, flowRate, waterUsage: round1((flowRate * intervalSec) / 60) },
@@ -67,7 +67,12 @@ async function tick(device) {
   });
 
   // Act on pending valve commands like the relay firmware would, then confirm.
-  const { commands } = await call(device, 'GET', '/commands');
+  const { commands, config } = await call(device, 'GET', '/commands');
+  // Apply new sensor calibration (sensitivity, pulses per L/min); the next heartbeat confirms it.
+  if (config && config.version !== device.configVersion) {
+    device.configVersion = config.version;
+    console.log(`  ${device.deviceName}: applied sensor calibration ${config.version}`);
+  }
   for (const c of commands) {
     if (c.type === 'firmware') {
       // Pretend to download and flash the image; the next heartbeat reports the new version.

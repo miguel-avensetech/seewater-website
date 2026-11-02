@@ -16,7 +16,7 @@ import { ConfirmDialog } from '@/components/ui/Modal';
 import { EmptyState, ErrorState, InlineNotice, PageLoader } from '@/components/ui/States';
 import { useToast } from '@/components/ui/Toast';
 import { TimeSeriesChart, CHART } from '@/components/charts/Charts';
-import { ValveControl } from '@/components/domain/ValveControl';
+import { ValveStatus } from '@/components/domain/ValveStatus';
 import { CopyButton, DeviceFormModal, SensorFormModal } from '@/components/domain/DeviceForms';
 import { fmtDate, fmtDateTime, fmtFlow, fmtRelative, fmtTime } from '@/lib/format';
 import { ACTIVATION, CALIBRATION, CONNECTION, LOG_STATUS, SENSOR_STATUS, SENSOR_TYPE, VALVE_COMMAND } from '@/lib/labels';
@@ -131,7 +131,7 @@ export default function DeviceDetailPage({ params }) {
                       </p>
                     </div>
                     <div className="flex gap-1.5">
-                      <ButtonLink size="sm" variant="ghost" href={s.sensorType === 'vibration' ? `/vibration?sensor=${s.id}` : `/calibration/flow?sensor=${s.id}`}>{s.sensorType === 'vibration' ? 'Baseline' : 'Calibrate'}</ButtonLink>
+                      <ButtonLink size="sm" variant="ghost" href="/calibration">Calibrate</ButtonLink>
                       {canEdit && <Button size="icon-sm" variant="ghost" icon={Pencil} aria-label="Edit sensor" onClick={() => setSensorModal({ open: true, sensor: s })} />}
                       {canEdit && <Button size="icon-sm" variant="ghost" icon={Trash2} aria-label="Remove sensor" onClick={() => setConfirm({ sensor: s })} />}
                     </div>
@@ -182,9 +182,9 @@ export default function DeviceDetailPage({ params }) {
           </Card>
 
           <Card>
-            <CardHeader title="Solenoid valve" description="Remote water shutoff via relay module" />
+            <CardHeader title="Solenoid valve" description="Operated by the homeowner from the app, or by automatic shutoff" />
             <CardBody>
-              <ValveControl valve={valve} device={device} onChanged={silent} />
+              <ValveStatus valve={valve} />
               {valve && <ValveHistory valveId={valve.id} version={valve.lastUpdated} />}
             </CardBody>
           </Card>

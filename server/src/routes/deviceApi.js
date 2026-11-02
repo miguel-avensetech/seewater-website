@@ -13,6 +13,7 @@ import { logDevice, logSystem } from '../services/activity.js';
 import { ingestReadings, recordHeartbeat } from '../services/ingest.js';
 import { acknowledgeValveCommand } from '../services/valves.js';
 import { markCodeUsed, resolveActivationCode } from '../services/activationCodes.js';
+import { deviceConfig } from '../services/deviceConfig.js';
 import { activeFirmwareUpdate, setFirmwareStatus } from '../services/firmware.js';
 
 const router = Router();
@@ -69,6 +70,8 @@ const heartbeatSchema = z.object({
   firmwareVersion: z.string().trim().max(50).optional(),
   signalStrength: z.number().min(-120).max(0).optional(),
   batteryLevel: z.number().min(0).max(100).optional(),
+  // config.version from GET /commands, once the device has applied it.
+  configVersion: z.string().trim().max(40).optional(),
 });
 
 router.post(
@@ -131,7 +134,9 @@ router.get(
     // Repeated until the job finishes, so a device that rebooted mid-update can resume.
     const fw = await activeFirmwareUpdate(req.device.id);
     if (fw) commands.push({ type: 'firmware', updateId: fw.id, version: fw.targetVersion, url: fw.url, sha256: fw.sha256, status: fw.status, requestedAt: fw.requestedAt });
-    res.json({ commands });
+    // Current sensor calibration; apply it when config.version differs from the
+    // one the device last applied, then report that version in the heartbeat.
+    res.json({ commands, config: await deviceConfig(req.device.id) });
   }),
 );
 

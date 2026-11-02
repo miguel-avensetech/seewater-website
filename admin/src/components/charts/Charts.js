@@ -23,6 +23,8 @@ export const CHART = {
   // CSS variables so the grid and axis follow the light/dark theme.
   grid: 'var(--color-line)',
   axis: 'var(--color-faint)',
+  ok: '#12925b',
+  yellow: '#e2b203',
   warn: '#c97a06',
   crit: '#d23b3b',
 };

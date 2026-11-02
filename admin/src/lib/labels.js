@@ -140,6 +140,8 @@ export const CALIBRATION = map([
   ['calibrated', 'Calibrated', 'ok'],
   ['due', 'Recalibration due', 'warn'],
   ['not_calibrated', 'Not calibrated', 'crit'],
+  ['awaiting_device', 'Waiting for device', 'warn'],
+  ['no_device', 'No device detected', 'neutral'],
 ]);
 
 export const SENSOR_TYPE = map([
@@ -147,11 +149,6 @@ export const SENSOR_TYPE = map([
   ['vibration', 'Vibration (piezo)', 'aqua'],
 ]);
 
-export const THRESHOLD_PROFILE = map([
-  ['custom', 'Custom profile', 'info'],
-  ['default', 'System default', 'neutral'],
-  ['none', 'Not configured', 'warn'],
-]);
 
 export const FIRMWARE_STATUS = map([
   ['pending', 'Waiting for device', 'warn'],

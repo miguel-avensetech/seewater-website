@@ -15,5 +15,8 @@
     "@firebase/rules-unit-testing": "^5.0.2",
     "firebase": "^12.19.0",
     "firebase-tools": "^15.34.0"
+  },
+  "dependencies": {
+    "expo": "^58.0.22"
   }
 }

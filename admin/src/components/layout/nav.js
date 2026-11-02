@@ -13,11 +13,8 @@ import {
   Home,
   KeyRound,
   BellRing,
-  Waves,
   HardDrive,
   Download,
-  Radio,
-  Droplets,
   SlidersHorizontal,
 } from 'lucide-react';
 
@@ -56,10 +53,7 @@ export const NAV = [
   {
     group: 'Sensor Calibration Management',
     items: [
-      { href: '/calibration/piezo', label: 'Piezo Calibration', icon: Radio },
-      { href: '/calibration/flow', label: 'Flow Calibration', icon: Droplets },
-      { href: '/vibration', label: 'Vibration Baseline', icon: Waves },
-      { href: '/thresholds', label: 'Threshold Profiles', icon: SlidersHorizontal },
+      { href: '/calibration', label: 'Sensor Calibration', icon: SlidersHorizontal, also: ['/vibration'] },
     ],
   },
   {

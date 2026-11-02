@@ -118,7 +118,7 @@ clients may only read (admins: operational data; homeowners: their own records);
 | Admin API | `server/src/routes/*.js` | Session cookie (httpOnly JWT), zod validation, role checks (`viewer` is read-only) |
 | Device API | `server/src/routes/deviceApi.js` | Per-device key issued at activation (stored hashed) |
 | UI kit | `admin/src/components/ui/` | Button, Card, Badge/DataSourceBadge, Field, Modal/ConfirmDialog, Toast, DataTable, Tabs, states |
-| Domain UI | `admin/src/components/domain/` | ValveControl, ThresholdMeter, user/device forms |
+| Domain UI | `admin/src/components/domain/` | ValveStatus (read-only), CalibrationCard, user/device forms |
 | Pages | `admin/src/app/(admin)/` | One folder per module; route protection in `src/middleware.js` + API 401 handling |
 
 Collections follow the manuscript data dictionary: `admins`, `users`, `houses`, `devices`, `sensors`,
@@ -152,7 +152,7 @@ The server decides the source from the device record; a payload cannot claim to 
   explicit detection threshold) **and** water flowing (≥ minimum leak flow). Vibration with no flow is
   logged as environmental noise, not alerted (manuscript ch. 2: multi-sensor verification).
 - Alerts are de-duplicated per sensor within the cooldown window; offline alerts auto-resolve on reconnect.
-- **Valve commands** (admin, homeowner or automatic) are recorded in `valveCommands` and start as
+- **Valve commands** (homeowner from the app, or automatic shutoff — administrators can view valves but not operate them) are recorded in `valveCommands` and start as
   *pending*. The valve state changes only when the ESP32 responds via `/valve-ack` (*acknowledged*).
   `positionConfirmed` is true only if the hardware reports a verified valve position — the
   manuscript's relay design cannot, so the UIs say physical confirmation is unavailable. Commands can
@@ -189,7 +189,7 @@ Grouped by the admin Functional Decomposition Diagram (manuscript Fig. 7.1):
 | IoT Device Management | Register Device, Activation Codes, Monitor Status, System Alerts, Device Logs, Firmware Update |
 | User Management | Registered Users (add user), Households, User Water Usage, User Feedback |
 | Announcement Management | Announcements · Rate Updates · Water Interruptions (tabs), Sent Notifications |
-| Sensor Calibration Management | Piezo Calibration, Flow Calibration, Vibration Baseline, Threshold Profiles |
+| Sensor Calibration Management | Sensor Calibration: one card per household with piezo and main-line flow sensors, alert levels and speedometer gauges (Vibration Baseline measuring tool linked from the cards) |
 | Account Management | Login / logout, System Preferences, System Logs |
 
 ## Device API (for ESP32 firmware)
@@ -199,10 +199,10 @@ All endpoints are under `/api/device-api`. After activation, send `X-Device-Id` 
 | Method | Path | Body |
 |---|---|---|
 | POST | `/activate` | `{ activationCode, macAddress?, firmwareVersion? }` → `{ deviceId, deviceKey, sensors[], valveId }` (key returned once) |
-| POST | `/heartbeat` | `{ firmwareVersion?, signalStrength? (dBm), batteryLevel? }` |
+| POST | `/heartbeat` | `{ firmwareVersion?, signalStrength? (dBm), batteryLevel?, configVersion? }` — `configVersion` is the `config.version` the device last applied |
 | POST | `/readings` | `{ readings: [{ sensorId, flowRate? (L/min), waterUsage? (L since last), vibrationLevel?, recordedAt? }] }` |
 | POST | `/logs` | `{ eventType, description, status }` |
-| GET | `/commands` | → `{ commands: [{ type: "valve", valveId, commandId, state } \| { type: "firmware", updateId, version, url, sha256 }] }` |
+| GET | `/commands` | → `{ commands: [{ type: "valve", valveId, commandId, state } \| { type: "firmware", updateId, version, url, sha256 }], config: { version, sensors: [{ id, sensorType, sensorLocation, status, sensitivity, calibrationFactor }] } }` — apply `config` when its version changes (new sensors, sensitivity, pulses per L/min), then send that version in the next heartbeat so Sensor Calibration shows "Applied on device" |
 | POST | `/valve-ack` | `{ valveId, commandId, state: "open"\|"closed", success, message?, positionConfirmed? }` |
 | POST | `/firmware-status` | `{ updateId, status: "downloading"\|"installing"\|"installed"\|"failed", message? }` — a heartbeat reporting the target `firmwareVersion` also completes the update |
 
@@ -219,11 +219,11 @@ cd admin && npm run build    # compiles all routes
 |---|---|
 | Admin auth (login, validation, password toggle, protected routes, logout, profile, password change, preferences) | Implemented |
 | Dashboard overview (users, devices, alerts, interruptions, system status, consumption, announcements, reports, activity) | Implemented |
-| Live monitoring (flow, daily usage, vibration, normal/high/critical, leak events, device status, valve control) | Implemented — live data requires installed hardware or the simulator |
+| Live monitoring (flow, daily usage, vibration, normal/high/critical, leak events, device status, valve state — read-only) | Implemented — live data requires installed hardware or the simulator |
 | Water usage analytics (daily / weekly / monthly, date range, household filter, comparisons, CSV) | Implemented |
 | User management (homeowners, households, devices, usage, audit history) | Implemented |
 | Device management (registration, activation codes, status, history, sensors, assignment) | Implemented |
-| Sensor calibration: Piezo Calibration and Flow Calibration (sensitivity, calibration factor, status, history) | Implemented |
+| Sensor calibration: per-household cards (piezo sensitivity and leak level, flow pulses per L/min and warning/critical levels) | Implemented |
 | Threshold profiles (per-sensor operating range, warning/critical levels, reset to system default) | Implemented |
 | Firmware update (OTA jobs per device: queue, deliver via `/commands`, progress, confirm by heartbeat, cancel) | Implemented — the ESP32 firmware must implement the HTTPS OTA download |
 | Vibration baseline (measure from stored no-flow readings, ranges, thresholds, history) | Implemented |

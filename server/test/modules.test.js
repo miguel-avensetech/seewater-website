@@ -4,6 +4,7 @@ import request from 'supertest';
 import { adminDatabase } from '../src/lib/firebaseAdmin.js';
 import { flushLive } from '../src/services/live.js';
 import { adminAgent, createAdmin, resetEmulators } from './helpers.js';
+import { requestValveCommand } from '../src/services/valves.js';
 
 let app;
 let admin;
@@ -84,13 +85,13 @@ test('heartbeat, readings and alerts update the live mirror; resolving removes t
 });
 
 test('valve commands appear in the operations history and live valve state', async () => {
-  await admin.post(`/api/valves/${creds.valveId}/command`).send({ action: 'close' });
+  await requestValveCommand({ valveId: creds.valveId, action: 'close', reason: 'Automatic shutoff: leak', actorType: 'automatic', emergency: true });
   const node = await live(`live/devices/${device.id}/valve`);
   assert.equal(node.commandStatus, 'pending');
   assert.equal(node.status, 'unknown');
   const hist = await admin.get('/api/valve-commands?status=pending');
   assert.equal(hist.body.total, 1);
-  assert.equal(hist.body.items[0].requestedByType, 'admin');
+  assert.equal(hist.body.items[0].requestedByType, 'automatic');
   assert.equal(hist.body.items[0].houseName, 'Dizon Residence');
 });
 

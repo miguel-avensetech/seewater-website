@@ -17,7 +17,7 @@ import { notifyHouseOwner } from './notify.js';
 
 const ACTOR_LABEL = { admin: 'Administrator', homeowner: 'Homeowner', automatic: 'Automatic shutoff' };
 
-export async function requestValveCommand({ valveId, action, reason, actor, actorType = 'admin', emergency = false }) {
+export async function requestValveCommand({ valveId, action, reason, actor, actorType = 'homeowner', emergency = false }) {
   const valve = await db.get(C.valves, valveId);
   if (!valve) throw notFound('Valve');
   if (valve.commandStatus === 'pending') {

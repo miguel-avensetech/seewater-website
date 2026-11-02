@@ -13,7 +13,7 @@ import { completeFirmwareFromHeartbeat } from './firmware.js';
 // Readings are classified by origin on the server — never trusted from the payload.
 const sourceOf = (device) => (device.isSimulated ? 'simulated' : 'device');
 
-export async function recordHeartbeat(device, { firmwareVersion, signalStrength, batteryLevel }) {
+export async function recordHeartbeat(device, { firmwareVersion, signalStrength, batteryLevel, configVersion }) {
   const wasOnline = device.connectionStatus === 'online';
   const source = sourceOf(device);
   const patch = {
@@ -22,6 +22,7 @@ export async function recordHeartbeat(device, { firmwareVersion, signalStrength,
     ...(firmwareVersion && { firmwareVersion }),
     ...(signalStrength != null && { signalStrength }),
     ...(batteryLevel != null && { batteryLevel }),
+    ...(configVersion && { appliedConfigVersion: configVersion, configAppliedAt: nowIso() }),
   };
   await db.update(C.devices, device.id, patch);
   await db.create(C.deviceStatusHistory, {

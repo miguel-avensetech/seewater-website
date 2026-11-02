@@ -60,7 +60,7 @@ export function Modal({ open, onClose, title, description, children, footer, siz
         tabIndex={-1}
         className={clsx(
           'relative flex max-h-[92vh] w-full animate-pop-in flex-col rounded-t-2xl bg-surface shadow-pop outline-none sm:rounded-2xl',
-          { sm: 'sm:max-w-md', md: 'sm:max-w-xl', lg: 'sm:max-w-3xl' }[size],
+          { sm: 'sm:max-w-md', md: 'sm:max-w-xl', lg: 'sm:max-w-3xl', xl: 'sm:max-w-5xl' }[size],
         )}
       >
         <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
