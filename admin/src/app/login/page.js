@@ -168,7 +168,7 @@ const features = [
   { icon: Waves, title: 'Vibration-based leak detection', text: 'Piezo sensors checked against calibrated environmental baselines.' },
   { icon: BellRing, title: 'Alerts and remote shutoff', text: 'High-flow and leak alerts with device-confirmed valve control.' },
 ];
-
+``
 export default function LoginPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
