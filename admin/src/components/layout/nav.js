@@ -14,7 +14,6 @@ import {
   KeyRound,
   BellRing,
   HardDrive,
-  Download,
   SlidersHorizontal,
 } from 'lucide-react';
 
@@ -31,7 +30,6 @@ export const NAV = [
       { href: '/monitoring', label: 'Monitor Status', icon: Activity },
       { href: '/alerts', label: 'System Alerts', icon: Bell, badge: 'alerts' },
       { href: '/logs/devices', label: 'Device Logs', icon: HardDrive },
-      { href: '/firmware', label: 'Firmware Update', icon: Download },
     ],
   },
   {

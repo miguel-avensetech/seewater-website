@@ -150,15 +150,6 @@ export const SENSOR_TYPE = map([
 ]);
 
 
-export const FIRMWARE_STATUS = map([
-  ['pending', 'Waiting for device', 'warn'],
-  ['downloading', 'Downloading', 'info'],
-  ['installing', 'Installing', 'info'],
-  ['installed', 'Installed', 'ok'],
-  ['failed', 'Failed', 'crit'],
-  ['cancelled', 'Cancelled', 'neutral'],
-]);
-
 export const SENSOR_STATUS = map([
   ['active', 'Active', 'ok'],
   ['inactive', 'Inactive', 'neutral'],

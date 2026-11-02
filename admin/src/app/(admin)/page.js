@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import clsx from 'clsx';
-import { AlertTriangle, ArrowRight, Bell, CalendarClock, CheckCircle2, Cpu, Droplets, Home, Megaphone, MessageSquareText, ShieldAlert, Users, WifiOff, Wrench } from 'lucide-react';
+import { ArrowRight, Bell, CalendarClock, CheckCircle2, Cpu, Droplets, Home, Megaphone, MessageSquareText, Users, WifiOff, Wrench } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { useAuth } from '@/components/layout/AuthProvider';
 import { useLive } from '@/components/layout/LiveProvider';
@@ -14,12 +14,6 @@ import { ButtonLink } from '@/components/ui/Button';
 import { TimeSeriesChart, CHART } from '@/components/charts/Charts';
 import { fmtBucket, fmtDateTime, fmtFlow, fmtLiters, fmtNumber, fmtRelative } from '@/lib/format';
 import { ANNOUNCEMENT_CATEGORY, ANNOUNCEMENT_STATUS, FEEDBACK_STATUS, FEEDBACK_TYPE, LOG_CATEGORY, LOG_STATUS, lookup } from '@/lib/labels';
-
-const SYSTEM_STATUS = {
-  operational: { label: 'All systems operational', tone: 'ok', icon: CheckCircle2, cls: 'from-ok-50 border-ok-600/25 text-ok-700' },
-  degraded: { label: 'Attention needed', tone: 'warn', icon: AlertTriangle, cls: 'from-warn-50 border-warn-600/30 text-warn-700' },
-  critical: { label: 'Critical issues open', tone: 'crit', icon: ShieldAlert, cls: 'from-crit-50 border-crit-600/30 text-crit-700' },
-};
 
 function greeting() {
   const h = new Date().getHours();
@@ -34,9 +28,7 @@ export default function DashboardPage() {
   if (loading && !data) return <PageLoader />;
   if (error && !data) return <ErrorState error={error} onRetry={reload} />;
 
-  const { stats, systemStatus, consumption, interruptions, recentAnnouncements, recentFeedback, recentActivity } = data;
-  const sys = SYSTEM_STATUS[systemStatus.status];
-  const SysIcon = sys.icon;
+  const { stats, consumption, interruptions, recentAnnouncements, recentFeedback, recentActivity } = data;
   // Full days only (today is still in progress).
   const fullDays = consumption.last7Days.slice(0, -1);
   const weekAvg = fullDays.reduce((s, d) => s + d.liters, 0) / (fullDays.length || 1);
@@ -49,19 +41,6 @@ export default function DashboardPage() {
         description="Overview of connected households, devices, and water activity across the SeeWater network."
         actions={<ButtonLink href="/monitoring" variant="secondary" icon={ArrowRight}>Open live monitoring</ButtonLink>}
       />
-
-      <div className={clsx('mb-6 flex flex-col gap-3 rounded-xl border bg-gradient-to-r to-surface px-5 py-4 sm:flex-row sm:items-center', sys.cls)}>
-        <SysIcon className="h-6 w-6 shrink-0" aria-hidden />
-        <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-semibold">{sys.label}</p>
-          <p className="text-[13px] opacity-80">{systemStatus.issues.length ? systemStatus.issues.join(' · ') : stats.totalDevices ? 'All devices reporting and no open alerts.' : 'No devices registered yet — register a device to start monitoring.'}</p>
-        </div>
-        {systemStatus.status !== 'operational' && (
-          <Link href="/alerts?status=active" className="inline-flex items-center gap-1 text-[13px] font-semibold underline-offset-2 hover:underline">
-            Review alerts <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        )}
-      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Registered users" value={fmtNumber(stats.totalUsers)} icon={Users} hint={`${fmtNumber(stats.activeUsers)} active accounts`} footer={<Link href="/users" className="font-semibold text-ocean-700 hover:underline">Manage users →</Link>} />
