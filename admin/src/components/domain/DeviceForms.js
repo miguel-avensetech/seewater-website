@@ -23,7 +23,7 @@ function useHouseOptions(open) {
   return (data?.items ?? []).map((h) => ({ value: h.id, label: `${h.houseName} — ${h.ownerName ?? 'no owner'}` }));
 }
 
-const emptyDevice = { deviceName: '', deviceType: 'esp32_gateway', macAddress: '', firmwareVersion: '', houseId: '', notes: '', flow: true, flowLocation: 'Main line', vibration: true, vibrationLocation: 'Main line', includeValve: true };
+const emptyDevice = { deviceName: '', deviceType: 'esp32_gateway', macAddress: '', houseId: '', notes: '', flow: true, flowLocation: 'Main line', vibration: true, vibrationLocation: 'Main line', includeValve: true };
 
 export function DeviceFormModal({ open, device, onClose, onSaved }) {
   const toast = useToast();
@@ -38,7 +38,7 @@ export function DeviceFormModal({ open, device, onClose, onSaved }) {
       vibrationLocation: !editing && v.vibration && !v.vibrationLocation.trim() ? 'Enter the sensor location' : null,
     }),
     onSubmit: async (v) => {
-      const base = { deviceName: v.deviceName, deviceType: v.deviceType, macAddress: v.macAddress.trim(), firmwareVersion: v.firmwareVersion, houseId: v.houseId || null, notes: v.notes };
+      const base = { deviceName: v.deviceName, deviceType: v.deviceType, macAddress: v.macAddress.trim(), houseId: v.houseId || null, notes: v.notes };
       const body = editing
         ? base
         : {
@@ -54,7 +54,7 @@ export function DeviceFormModal({ open, device, onClose, onSaved }) {
   });
 
   useEffect(() => {
-    if (open) form.reset(device ? { ...emptyDevice, deviceName: device.deviceName, deviceType: device.deviceType, macAddress: device.macAddress ?? '', firmwareVersion: device.firmwareVersion ?? '', houseId: device.houseId ?? '', notes: device.notes ?? '' } : emptyDevice);
+    if (open) form.reset(device ? { ...emptyDevice, deviceName: device.deviceName, deviceType: device.deviceType, macAddress: device.macAddress ?? '', houseId: device.houseId ?? '', notes: device.notes ?? '' } : emptyDevice);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, device]);
 
@@ -79,7 +79,6 @@ export function DeviceFormModal({ open, device, onClose, onSaved }) {
           <Input label="Device name" placeholder="SW-GW-007" required {...form.bind('deviceName')} />
           <Select label="Device type" options={DEVICE_TYPES} {...form.bind('deviceType')} />
           <Input label="MAC address" placeholder="24:6F:28:AA:BB:CC" hint="Optional — locks activation to this hardware" {...form.bind('macAddress')} />
-          <Input label="Firmware version" placeholder="1.2.0" {...form.bind('firmwareVersion')} />
         </div>
         <Select label="Household" placeholder="Not assigned yet" options={houseOptions} {...form.bind('houseId')} hint="Devices must be assigned before they can report readings." />
 

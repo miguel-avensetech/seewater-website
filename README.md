@@ -188,7 +188,7 @@ Grouped by the admin Functional Decomposition Diagram (manuscript Fig. 7.1):
 |---|---|
 | IoT Device Management | Register Device, Activation Codes, Monitor Status, System Alerts, Device Logs, Firmware Update |
 | User Management | Registered Users (add user), Households, User Water Usage, User Feedback |
-| Announcement Management | Announcements · Rate Updates · Water Interruptions (tabs), Sent Notifications |
+| Announcement Management | Announcements · Water Interruptions (tabs), Sent Notifications |
 | Sensor Calibration Management | Sensor Calibration: one card per household with piezo and main-line flow sensors, alert levels and speedometer gauges (Vibration Baseline measuring tool linked from the cards) |
 | Account Management | Login / logout, System Preferences, System Logs |
 
@@ -213,6 +213,18 @@ cd server && npm test        # 29 API tests: admin + homeowner auth, roles, data
 cd admin && npm run build    # compiles all routes
 ```
 
+### Health check (running stack)
+
+With the API (`:4000`) and admin site (`:3000`) running:
+
+```bash
+cd server && npm run healthcheck            # read-only: ~85 checks across API, admin pages, device API, mobile API
+cd server && npm run healthcheck -- --write # also registers → activates → deactivates → removes a throwaway
+                                            # device (HC-…) and a draft announcement, then cleans up
+```
+
+Set `HEALTHCHECK_ADMIN_EMAIL` / `HEALTHCHECK_ADMIN_PASSWORD` (and optionally `HEALTHCHECK_HOMEOWNER_EMAIL` / `HEALTHCHECK_HOMEOWNER_PASSWORD`) in `server/.env` — see `.env.example`. Without them only the unauthenticated checks run. Exit code is 1 when any check fails.
+
 ## Feature status
 
 | Module | Status |
@@ -233,7 +245,7 @@ cd admin && npm run build    # compiles all routes
 | Settings (profile, preferences, alert toggles, thresholds, auto-shutoff) | Implemented |
 | Homeowner mobile app | Implemented in `../application` (Expo) |
 | Physical valve actuation, ESP32 firmware | **Not in this repository** — integrate via the device API |
-| Water rates / billing updates | Rate schedules (₱/m³ tiers), publishing with billing notices, labelled usage estimates. **No official billing or payment processing.** |
+| Water rates / billing updates | Removed from the admin website. The rates API (`/api/rates`, `/api/mobile/rates`) remains for existing schedules. **No official billing or payment processing.** |
 | Water interruptions | Planned/emergency interruptions with derived status, linked advisories and homeowner notifications |
 | Activation codes, notifications | Dedicated admin pages (revoke, send) |
 | InfluxDB time-series storage | Not used — readings are stored in Firestore (TTL) with Realtime Database for live state |

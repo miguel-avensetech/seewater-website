@@ -35,7 +35,6 @@ const deviceSchema = z.object({
   deviceName: trimmed(2, 100),
   deviceType: z.enum(['esp32_gateway', 'esp32_sensor_node']).default('esp32_gateway'),
   macAddress: mac,
-  firmwareVersion: z.string().trim().max(50).optional().default(''),
   houseId: z.string().trim().optional().nullable().default(null),
   notes: z.string().trim().max(500).optional().default(''),
 });

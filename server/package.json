@@ -2,7 +2,7 @@
   "name": "seewater-server",
   "version": "1.0.0",
   "private": true,
-  "description": "SeeWater API \u2014 admin dashboard backend and IoT device ingestion",
+  "description": "SeeWater API — admin dashboard backend and IoT device ingestion",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
@@ -15,7 +15,8 @@
     "emulators": "../node_modules/.bin/firebase emulators:start --config ../firebase.json --project demo-seewater --import=../.firebase-data --export-on-exit=../.firebase-data",
     "sync-live": "node --env-file-if-exists=.env scripts/syncLive.js",
     "dev:emulator": "node --watch --env-file=.env.emulator src/index.js",
-    "check-firebase": "node --env-file-if-exists=.env scripts/checkFirebase.js"
+    "check-firebase": "node --env-file-if-exists=.env scripts/checkFirebase.js",
+    "healthcheck": "node --env-file-if-exists=.env scripts/healthcheck.js"
   },
   "engines": {
     "node": ">=20.12"

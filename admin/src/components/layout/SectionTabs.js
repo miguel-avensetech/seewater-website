@@ -26,10 +26,9 @@ export function SectionTabs({ tabs, className }) {
   );
 }
 
-// Announcement Management (manuscript Fig. 7.1): announcements, plus the rate
-// updates and water interruption advisories that homeowners see in the app.
+// Announcement Management (manuscript Fig. 7.1): announcements, plus the water
+// interruption advisories that homeowners see in the app.
 export const ANNOUNCEMENT_TABS = [
   { href: '/announcements', label: 'Announcements' },
-  { href: '/rates', label: 'Rate Updates' },
   { href: '/interruptions', label: 'Water Interruptions' },
 ];

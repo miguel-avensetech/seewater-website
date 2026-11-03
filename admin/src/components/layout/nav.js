@@ -44,7 +44,7 @@ export const NAV = [
   {
     group: 'Announcement Management',
     items: [
-      { href: '/announcements', label: 'Announcements', icon: Megaphone, also: ['/rates', '/interruptions'] },
+      { href: '/announcements', label: 'Announcements', icon: Megaphone, also: ['/interruptions'] },
       { href: '/notifications', label: 'Sent Notifications', icon: BellRing },
     ],
   },
