@@ -127,7 +127,7 @@ function Gauge({ value, peak, zones: allZones, unit, label, calibrated }) {
 
 function Section({ icon: Icon, title, subtitle, badge, actions, children }) {
   return (
-    <div className="space-y-3 rounded-lg border border-line p-4">
+    <div className="flex flex-col gap-3 rounded-lg border border-line p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-sm font-semibold text-ink"><Icon className="h-4 w-4 shrink-0 text-ocean-600" aria-hidden /> {title}</div>
@@ -284,7 +284,7 @@ function PiezoSensor({ sensor, canEdit, onSaved, canRemove }) {
         <p className="text-xs text-warn-700">No leak level yet. Turn off all taps, then use Auto-calibrate.</p>
       ) : null}
       {canEdit && (
-        <div className="flex flex-wrap gap-2">
+        <div className="mt-auto flex flex-wrap gap-2 pt-1">
           <Button size="sm" variant="secondary" icon={Sparkles} loading={auto.busy} onClick={autoCalibrate}>Auto-calibrate</Button>
           <Button size="sm" icon={Save} loading={save.busy} disabled={!dirty} onClick={submit}>Save</Button>
         </div>
@@ -431,7 +431,7 @@ function FlowSection({ flow, canEdit, onSaved }) {
         </form>
       )}
       {canEdit && (
-        <div className="flex flex-wrap gap-2">
+        <div className="mt-auto flex flex-wrap gap-2 pt-1">
           <Button size="sm" variant="secondary" icon={Sparkles} loading={helper.busy && !test} onClick={suggest}>Suggest levels</Button>
           {!test && <Button size="sm" variant="secondary" icon={FlaskConical} onClick={() => setTest({ liters: '', minutes: 5 })}>Bucket test</Button>}
           <Button size="sm" icon={Save} loading={save.busy} disabled={!dirty} onClick={submit}>Save</Button>
@@ -459,26 +459,32 @@ export function CalibrationDetails({ row, hours, onSaved }) {
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-4 text-[13px] md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid gap-4 text-[13px] md:grid-cols-2">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge map={CONNECTION} value={row.device.connectionStatus} />
             {row.device.isSimulated && <DataSourceBadge state="simulated" />}
             <span className="text-muted">Device <span className="font-mono text-ink">{row.deviceName}</span></span>
           </div>
-          <div className="rounded-lg border border-line p-3">
-            <p className="flex items-center gap-1.5 font-semibold text-ink"><sync.icon className="h-4 w-4" aria-hidden /> <Badge tone={sync.tone}>{sync.label}</Badge></p>
-            <p className="mt-1 text-xs text-muted">{sync.text(row)}</p>
-          </div>
           <p className="text-[11px] text-faint">Gauges: needle = latest reading · dot = peak in the last {hours} hours · grey until calibrated, then green normal, yellow warning, red alert.</p>
         </div>
-        <div className="space-y-3">
+        <div className="rounded-lg border border-line p-3">
+          <p className="flex items-center gap-1.5 font-semibold text-ink"><sync.icon className="h-4 w-4" aria-hidden /> <Badge tone={sync.tone}>{sync.label}</Badge></p>
+          <p className="mt-1 text-xs text-muted">{sync.text(row)}</p>
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Piezo vibration sensors ({piezos.length})</p>
+      {/* One even grid: the main-line flow sensor first, then each piezo. */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+          Sensors · main line {flow ? 1 : 0} · piezo {piezos.length}
+        </p>
+        <div className="grid gap-4 lg:grid-cols-2">
+          {flow ? (
+            <FlowSection flow={flow} canEdit={canEdit} onSaved={onSaved} />
+          ) : (
+            <p className="flex items-center justify-center rounded-lg border border-dashed border-line p-4 text-xs text-muted">No flow sensor on this device.</p>
+          )}
           {piezos.map((p) => (
             <PiezoSensor
               key={p.sensorId}
@@ -488,18 +494,9 @@ export function CalibrationDetails({ row, hours, onSaved }) {
               onSaved={onSaved}
             />
           ))}
-          {!piezos.length && <p className="text-xs text-muted">No piezo sensor on this device yet.</p>}
-          {canEdit && <AddPiezo deviceId={row.device.id} existing={piezos.map((p) => p.location)} onSaved={onSaved} />}
+          {!piezos.length && <p className="flex items-center justify-center rounded-lg border border-dashed border-line p-4 text-xs text-muted">No piezo sensor on this device yet.</p>}
         </div>
-
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Main line</p>
-          {flow ? (
-            <FlowSection flow={flow} canEdit={canEdit} onSaved={onSaved} />
-          ) : (
-            <p className="text-xs text-muted">No flow sensor on this device.</p>
-          )}
-        </div>
+        {canEdit && <AddPiezo deviceId={row.device.id} existing={piezos.map((p) => p.location)} onSaved={onSaved} />}
       </div>
       {!canEdit && <InlineNotice tone="info">Your account is read-only. Ask an administrator to change calibration.</InlineNotice>}
     </div>
@@ -567,7 +564,7 @@ export function CalibrationTile({ row, onSelect, selected }) {
         />
         <TileRow icon={Droplets} label="Flow" value={flow ? fmtLevel(flow.stats.now, 'L/min') : 'No sensor'} tone={flowHigh && 'warn'} />
       </div>
-      <div className="flex w-full flex-wrap items-center gap-1.5">
+      <div className="mt-auto flex w-full flex-wrap items-center gap-1.5">
         <StatusBadge map={CONNECTION} value={row.device.connectionStatus} />
         {row.issues.length ? (
           <Badge tone="warn" dot>{row.issues.length === 1 ? row.issues[0] : `${row.issues.length} things to check`}</Badge>
