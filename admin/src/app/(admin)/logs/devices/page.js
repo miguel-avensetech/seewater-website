@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { HardDrive } from 'lucide-react';
 import { useListQuery } from '@/hooks/useListQuery';
+import { LOG_TABS, SectionTabs } from '@/components/layout/SectionTabs';
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/Layout';
 import { DataSourceBadge, StatusBadge } from '@/components/ui/Badge';
@@ -23,6 +24,7 @@ function DeviceLogsPage() {
 
   return (
     <>
+      <SectionTabs tabs={LOG_TABS} />
       <PageHeader title="Device Logs" description="Operational events from registered ESP32 devices: sensor readings and detections, valve operations, connectivity, firmware and calibration changes." />
       <Card>
         <TableToolbar>

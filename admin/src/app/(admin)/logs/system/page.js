@@ -3,6 +3,7 @@
 import { ScrollText } from 'lucide-react';
 import { useListQuery } from '@/hooks/useListQuery';
 import { useLive } from '@/components/layout/LiveProvider';
+import { LOG_TABS, SectionTabs } from '@/components/layout/SectionTabs';
 import { Card } from '@/components/ui/Card';
 import { PageHeader, Tabs } from '@/components/ui/Layout';
 import { DataSourceBadge, StatusBadge } from '@/components/ui/Badge';
@@ -31,6 +32,7 @@ export default function SystemLogsPage() {
 
   return (
     <>
+      <SectionTabs tabs={LOG_TABS} />
       <PageHeader title="System Logs" description="Chronological record of detections, sensor events, connectivity changes, valve operations, system updates and administrator actions." />
       <div className="mb-4 overflow-x-auto pb-1">
         <Tabs tabs={CATEGORY_TABS} value={params.category ?? ''} onChange={(v) => list.setFilter('category', v)} />

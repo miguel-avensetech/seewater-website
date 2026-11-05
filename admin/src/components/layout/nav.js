@@ -13,7 +13,6 @@ import {
   Home,
   KeyRound,
   BellRing,
-  HardDrive,
   SlidersHorizontal,
 } from 'lucide-react';
 
@@ -29,7 +28,6 @@ export const NAV = [
       { href: '/activation-codes', label: 'Activation Codes', icon: KeyRound },
       { href: '/monitoring', label: 'Monitor Status', icon: Activity },
       { href: '/alerts', label: 'System Alerts', icon: Bell, badge: 'alerts' },
-      { href: '/logs/devices', label: 'Device Logs', icon: HardDrive },
     ],
   },
   {
@@ -58,7 +56,7 @@ export const NAV = [
     group: 'Account Management',
     items: [
       { href: '/settings', label: 'System Preferences', icon: Settings },
-      { href: '/logs/system', label: 'System Logs', icon: ScrollText },
+      { href: '/logs/system', label: 'Logs', icon: ScrollText, also: ['/logs/devices'] },
     ],
   },
 ];

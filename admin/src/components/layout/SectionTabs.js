@@ -32,3 +32,9 @@ export const ANNOUNCEMENT_TABS = [
   { href: '/announcements', label: 'Announcements' },
   { href: '/interruptions', label: 'Water Interruptions' },
 ];
+
+// System Logs and Device Logs share one sidebar item.
+export const LOG_TABS = [
+  { href: '/logs/system', label: 'System Logs' },
+  { href: '/logs/devices', label: 'Device Logs' },
+];
